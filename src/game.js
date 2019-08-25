@@ -2,6 +2,7 @@ import Ship from './ship.js';
 import Camera from './camera.js';
 import Asteroid from './asteroid.js'
 import seedrandom from './seedrandom.js'
+import MiniMap from './minimap.js';
 
 export default class Game {
     constructor(width, height, seed){
@@ -22,11 +23,12 @@ export default class Game {
         this.height = height;
         this.ship = new Ship(this);
         this.camera = new Camera(this);
+        this.minimap = new MiniMap(this);
         this.chunk = {
             x: 0,
             y: 0
         };
-        this.asteroidClusters = this.loadAsteroidCluster({x: 0, y: 0});
+        this.asteroidCluster = this.loadAsteroidCluster({x: 0, y: 0});
         this.FPS = 30;
         
 
@@ -39,7 +41,7 @@ export default class Game {
             this.chunk.y != Math.floor(this.camera.position.y / this.height)){
                 this.chunk.x = Math.floor(this.camera.position.x / this.width);
                 this.chunk.y = Math.floor(this.camera.position.y / this.height);
-                this.asteroidClusters = this.loadAsteroidCluster(this.chunk);
+                this.asteroidCluster = this.loadAsteroidCluster(this.chunk);
             }
     }
 
@@ -48,6 +50,20 @@ export default class Game {
         // Draw space
         ctx.fillStyle = "#000";
         ctx.fillRect(this.camera.cornerPosition.x, this.camera.cornerPosition.y, this.width, this.height);
+        this.camera.draw(ctx);
+
+        this.ship.draw(ctx);
+
+        this.minimap.draw(ctx);
+        
+        this.asteroidCluster.forEach(cluster => {
+            cluster.forEach(asteroid => {
+                asteroid.draw(ctx);
+            });
+        });
+
+        /**  FOR DEBUGGING 
+         * Draws border around current chunk.
         ctx.strokeStyle = "white";
         ctx.lineWidth = Ship.RADIUS / 10;
         for(let r = -1; r < 2; r++) {
@@ -56,18 +72,7 @@ export default class Game {
                 ctx.stroke();
             }
         }
-        this.camera.draw(ctx);
-
-
-
-        // Draw Triangular Ship
-        this.ship.draw(ctx);
-        this.asteroidClusters.forEach(cluster => {
-            cluster.forEach(asteroid => {
-                asteroid.draw(ctx);
-            });
-        });
-
+        */
     }
 
     start() {
@@ -80,7 +85,6 @@ export default class Game {
         // Setting up seeding so any specific chunk will always generate in the same way
         Math.seedrandom(this.seed + chunk.x + (chunk.y * this.seed * 2));
         let numOfAsteroids = Math.ceil(Math.sqrt(Math.random()) * 10);
-        console.log(chunk);
 
         for(let i = 0; i < numOfAsteroids; i++){
             let intersecting = true;
@@ -93,24 +97,22 @@ export default class Game {
                 asteroids.forEach(asteroid => {
                     // Checking if this asteroid will interfere with one of the others
                     // assuming max radius.
-                    console.log(Math.sqrt(Math.pow(asteroid.position.x - xPos, 2) + Math.pow(asteroid.position.y - yPos, 2)) <= Asteroid.MAX_RADIUS * 2);
                     if(Math.sqrt(Math.pow(asteroid.position.x - xPos, 2) + Math.pow(asteroid.position.y - yPos, 2)) <= Asteroid.MAX_RADIUS * 2)
                         intersecting = true;
                 });
-                console.log("Intersecting: " + intersecting);
             }
             asteroids.push(new Asteroid(this, {x: xPos, y: yPos}, Math.random(), Math.ceil(Math.random() * (Asteroid.MAX_RADIUS - Asteroid.MIN_RADIUS)) + Asteroid.MIN_RADIUS));
         }
         return asteroids;
     }
 
-    // Generate a 3x3 gid of chunks of asteroids surrounding the player
+    // Generate a gid of chunks of asteroids surrounding the player
     // a.k.a a cluster of asteroids.
     loadAsteroidCluster(chunk) {
         console.log("Loading new Cluster");
         let asteroidClusters = [];
-        for(let r = -1; r < 2; r++) {
-            for(let c = -1; c < 2; c++) {
+        for(let r = -2; r < 3; r++) {
+            for(let c = -2; c < 3; c++) {
                 asteroidClusters.push(this.loadAsteroidChunk({x: chunk.x + r, y: chunk.y + c}));
             }
         }
