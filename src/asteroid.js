@@ -26,7 +26,6 @@ export default class Asteroid {
         ctx.closePath();
         ctx.stroke();
     }
-
-    
-
 }
+Asteroid.MAX_RADIUS = 40;
+Asteroid.MIN_RADIUS = 15;

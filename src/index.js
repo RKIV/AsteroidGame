@@ -5,7 +5,7 @@ import InputHandler from './input.js';
 let canv = document.getElementById("gameCanvas");
 let ctx = canv.getContext("2d");
 
-let game = new Game(canv.width, canv.height);
+let game = new Game(canv.width, canv.height, 13);
 let input = new InputHandler(game);
 
 

@@ -13,6 +13,10 @@ export default class Camera{
             x: 0,
             y: 0
         };
+        this.chunk = {
+            x: 0,
+            y: 0
+        };
     }
     
     update(){
@@ -20,7 +24,8 @@ export default class Camera{
         let yDiff = this.game.ship.position.y - this.position.y;
         this.velocity.x = Math.sign(xDiff) * Math.pow(Math.abs(xDiff), 2) / 100;
         this.velocity.y = Math.sign(yDiff) * Math.pow(Math.abs(yDiff), 2) / 100;
-        
+        this.chunk.x =  Math.floor(this.position.x / this.game.width);
+        this.chunk.y = Math.floor(this.position.y / this.game.height);
     }
 
     draw(ctx) {
