@@ -26,7 +26,7 @@ export default class Game {
             x: 0,
             y: 0
         };
-        this.asteroidClusters = this.loadCluster({x: 0, y: 0});
+        this.asteroidClusters = this.loadAsteroidCluster({x: 0, y: 0});
         this.FPS = 30;
         
 
@@ -39,7 +39,7 @@ export default class Game {
             this.chunk.y != Math.floor(this.camera.position.y / this.height)){
                 this.chunk.x = Math.floor(this.camera.position.x / this.width);
                 this.chunk.y = Math.floor(this.camera.position.y / this.height);
-                this.asteroidClusters = this.loadCluster(this.chunk);
+                this.asteroidClusters = this.loadAsteroidCluster(this.chunk);
             }
     }
 
@@ -48,7 +48,17 @@ export default class Game {
         // Draw space
         ctx.fillStyle = "#000";
         ctx.fillRect(this.camera.cornerPosition.x, this.camera.cornerPosition.y, this.width, this.height);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = Ship.RADIUS / 10;
+        for(let r = -1; r < 2; r++) {
+            for(let c = -1; c < 2; c++) {
+                ctx.rect(this.chunk.x * this.width, this.chunk.y * this.height, this.width, this.height);
+                ctx.stroke();
+            }
+        }
         this.camera.draw(ctx);
+
+
 
         // Draw Triangular Ship
         this.ship.draw(ctx);
@@ -64,11 +74,11 @@ export default class Game {
 
     }
 
-    generateAsteroids(chunk) {
+    // Generate random set of asteroids given a chunk of the same size as the screen
+    loadAsteroidChunk(chunk) {
         let asteroids = [];
-        // Setting up seeding so any specific cunk will always generate in the same way
-        Math.seedrandom(this.seed + chunk.x);
-        Math.seedrandom(Math.floor(Math.random() * chunk.y * 1000));
+        // Setting up seeding so any specific chunk will always generate in the same way
+        Math.seedrandom(this.seed + chunk.x + (chunk.y * this.seed * 2));
         let numOfAsteroids = Math.ceil(Math.sqrt(Math.random()) * 10);
         console.log(chunk);
 
@@ -78,26 +88,30 @@ export default class Game {
             let yPos;
             while(intersecting) {
                 intersecting = false;
-                xPos = Math.floor(Math.random() * (this.width)) + chunk.x * this.width;
-                yPos = Math.floor(Math.random() * (this.height)) + chunk.y * this.height;
+                xPos = Math.floor(Math.random() * (this.width - 20)) + chunk.x * this.width + 10;
+                yPos = Math.floor(Math.random() * (this.height - 20)) + chunk.y * this.height + 10;
                 asteroids.forEach(asteroid => {
                     // Checking if this asteroid will interfere with one of the others
                     // assuming max radius.
-                    if(Math.sqrt(Math.pow(asteroid.position.x - xPos, 2) + Math.pow(asteroid.position.y - yPos, 2)) <= asteroid.MAX_RADIUS * 2)
+                    console.log(Math.sqrt(Math.pow(asteroid.position.x - xPos, 2) + Math.pow(asteroid.position.y - yPos, 2)) <= Asteroid.MAX_RADIUS * 2);
+                    if(Math.sqrt(Math.pow(asteroid.position.x - xPos, 2) + Math.pow(asteroid.position.y - yPos, 2)) <= Asteroid.MAX_RADIUS * 2)
                         intersecting = true;
                 });
+                console.log("Intersecting: " + intersecting);
             }
-            asteroids.push(new Asteroid(this, {x: xPos, y: yPos}, Math.random(), Math.ceil(Math.random() * 25) + 15));
+            asteroids.push(new Asteroid(this, {x: xPos, y: yPos}, Math.random(), Math.ceil(Math.random() * (Asteroid.MAX_RADIUS - Asteroid.MIN_RADIUS)) + Asteroid.MIN_RADIUS));
         }
-        console.log(asteroids);
         return asteroids;
     }
 
-    loadCluster(chunk) {
+    // Generate a 3x3 gid of chunks of asteroids surrounding the player
+    // a.k.a a cluster of asteroids.
+    loadAsteroidCluster(chunk) {
+        console.log("Loading new Cluster");
         let asteroidClusters = [];
         for(let r = -1; r < 2; r++) {
             for(let c = -1; c < 2; c++) {
-                asteroidClusters.push(this.generateAsteroids({x: chunk.x + r, y: chunk.y + c}));
+                asteroidClusters.push(this.loadAsteroidChunk({x: chunk.x + r, y: chunk.y + c}));
             }
         }
         return asteroidClusters;
