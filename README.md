@@ -3,7 +3,7 @@
 
 Written completely in javascript using the html canvas element.
 
-##Cool Things:
+## Cool Things:
 - Has a chunk based random loader to allow for infinitely sized levels
 - Minimap system
 
