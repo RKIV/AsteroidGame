@@ -1,3 +1,5 @@
+import Projectile from './projectile.js';
+
 export default class Ship {
     constructor(game) {
         this.game = game;
@@ -10,7 +12,7 @@ export default class Ship {
             y: 0
         };
         this.thrusting = false;
-        this.angle = 0.1 * Math.PI; // In Radians
+        this.angle = 0; // In Radians
         this.angularSpeed = 0;
 
     }
@@ -35,7 +37,7 @@ export default class Ship {
         ctx.beginPath();
         // Nose of the ship
         ctx.moveTo(
-            this.position.x + (4 / 3) *Ship.RADIUS * Math.cos(this.angle),
+            this.position.x + (4 / 3) * Ship.RADIUS * Math.cos(this.angle),
             this.position.y - (4 / 3) * Ship.RADIUS * Math.sin(this.angle)
         );
         // Rear Left
@@ -66,6 +68,11 @@ export default class Ship {
     turnRight(){ this.angularSpeed = -Ship.TURN_SPEED / this.game.FPS; }
 
     stopTurn(){ this.angularSpeed = 0; }
+
+    shootProjectile(){
+        this.game.projectiles.push(new Projectile(this.game, this.position, {x: 1000 * Math.cos(this.angle) + this.velocity.x, 
+                                                                        y: 1000 * Math.sin(this.angle) + this.velocity.y}));
+    }
 }
 
 

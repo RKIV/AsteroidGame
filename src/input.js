@@ -14,6 +14,10 @@ export default class InputHandler {
                 case 39:
                     game.ship.turnRight();
                     break;
+                // Space
+                case 32:
+                    game.ship.shootProjectile();
+                    break;
             }
          })
 

@@ -24,6 +24,7 @@ export default class Game {
         this.ship = new Ship(this);
         this.camera = new Camera(this);
         this.minimap = new MiniMap(this);
+        this.projectiles = [];
         this.chunk = {
             x: 0,
             y: 0
@@ -43,15 +44,22 @@ export default class Game {
                 this.chunk.y = Math.floor(this.camera.position.y / this.height);
                 this.asteroidCluster = this.loadAsteroidCluster(this.chunk);
             }
+        this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
+        this.projectiles.forEach(projectile => {
+            projectile.update();
+        })
+        console.log(this.projectiles);
     }
 
     draw(ctx) {
+        // Move Camera
+        this.camera.draw(ctx);
         ctx.clearRect(this.camera.position.x - this.width / 2, this.camera.position.y - this.height / 2, this.width, this.height);
+        
         // Draw space
         ctx.fillStyle = "#000";
         ctx.fillRect(this.camera.cornerPosition.x, this.camera.cornerPosition.y, this.width, this.height);
-        this.camera.draw(ctx);
-
+        
         this.ship.draw(ctx);
 
         this.minimap.draw(ctx);
@@ -61,6 +69,10 @@ export default class Game {
                 asteroid.draw(ctx);
             });
         });
+
+        this.projectiles.forEach(projectile => {
+            projectile.draw(ctx);
+        })
 
         /**  FOR DEBUGGING 
          * Draws border around current chunk.
@@ -118,4 +130,6 @@ export default class Game {
         }
         return asteroidClusters;
     }
+
+
 }
